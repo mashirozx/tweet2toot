@@ -24,10 +24,15 @@ def TootPoster(data):
 
   if data['video_count'] is not None:
     id=1
-    try:
-      media_ids_arr.append(media_post('temp/video%d.mp4' % id))
-    except Exception:
+    if config['MASTODON']['IncludeVideo'] == 'false':
       media_ids_arr.append(media_post('temp/video%d.png' % id))
+      data['plain'] = data['plain'] + '\n'+config['MASTODON']['VideoSourcePrefix']+' ' + data['video_link']
+    else:
+      try:
+        media_ids_arr.append(media_post('temp/video%d.mp4' % id))
+      except Exception:
+        media_ids_arr.append(media_post('temp/video%d.png' % id))
+        data['plain'] = data['plain'] + '\n'+config['MASTODON']['VideoSourcePrefix']+' ' + data['video_link']
 
   else:
     if data['image_count'] is not None:
@@ -41,8 +46,7 @@ def TootPoster(data):
     while len(media_ids_arr) > 4:
       media_ids_arr.pop()
 
-  status_content=data['plain']
-  mastodon.status_post(status=status_content, media_ids=media_ids_arr, visibility=config['MASTODON']['TootVisibility'])
+  mastodon.status_post(status=data['plain'], media_ids=media_ids_arr, visibility=config['MASTODON']['TootVisibility'])
 
 if __name__ == '__main__':
   test_data = {'gif_count': 1, 'video_count': None, 'image_count': 3, 'plain': 'Tooting from python using `status_post` #mastodonpy !'}

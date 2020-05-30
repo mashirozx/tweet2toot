@@ -24,7 +24,7 @@ def MediaDownloader(data):
       ('User-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36')]
   urllib.request.install_opener(opener)
 
-  res = {'gif_count': None, 'video_count': None, 'image_count': None, 'plain': None}
+  res = {'gif_count': None, 'video_count': None, 'image_count': None, 'plain': None, 'video_link': None}
 
   if data['image']:
     img_id = 1
@@ -69,8 +69,11 @@ def MediaDownloader(data):
     for url in data['video']:
       if (video_id <= 1):
         try:
-          urllib.request.urlretrieve(url.replace('https://video.twimg.com/',config['TWITTER']['VideoProxy']), 'temp/video'+str(video_id)+'.mp4')
+          if config['MASTODON']['IncludeVideo'] != 'false':
+            urllib.request.urlretrieve(url.replace('https://video.twimg.com/',config['TWITTER']['VideoProxy']), 'temp/video'+str(video_id)+'.mp4')
+
           urllib.request.urlretrieve(data['video_poster'][video_id-1].replace('https://pbs.twimg.com/',config['TWITTER']['ImageProxy']), 'temp/video'+str(video_id)+'.png')
+          res['video_link']=url
           video_id = video_id+1
         except Exception:
           print(f'ERRO: failed[vid]: {url}')
