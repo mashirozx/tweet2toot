@@ -41,6 +41,10 @@ def TweetDecoder(rss_data):
       data['video'].append(video.get('src'))
       data['video_poster'].append(video.get('poster'))
       video.replace_with('')
+    if ('https://video.twimg.com/amplify_video' in video.get('src')):
+      data['video'].append(video.get('src'))
+      data['video_poster'].append(video.get('poster'))
+      video.replace_with('')
 
   for image in soup.find_all('img'):
     # print(video.get('src'))
