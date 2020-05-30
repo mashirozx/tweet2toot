@@ -1,5 +1,4 @@
-tweet2toot
-===
+# tweet2toot
 
 A simple script that transport tweets from twitter to Mastodon. Based on the Twitter RSS feed powered by [RSSHub](https://rsshub.app).
 
