@@ -9,6 +9,12 @@ nano conf.ini
 python3 run.py
 ```
 
+Please install FFmpeg if you need support for twitter's GIFs.
+
+```
+sudo apt install ffmpeg
+```
+
 crontab job setting:
 ```
 crontab -e
