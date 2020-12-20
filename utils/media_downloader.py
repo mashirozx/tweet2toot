@@ -3,12 +3,10 @@
 """
 Created on May 29, 2020
 Desc: Media file downloader
-Author: Mashiro 
+Author: Mashiro
 URL: https://2heng.xin
 License: MIT
 """
-import urllib.request
-import ffmpy
 from .get_config import GetConfig
 
 config = GetConfig()
@@ -18,71 +16,28 @@ def MediaDownloader(data):
   :param object: Data return from TweetDecoder
   :return {'gif_count': (max+1)gif_id, 'video_count': video_id, 'image_count': img_id, 'plain': str}
   """
-  # set header
-  opener = urllib.request.build_opener()
-  opener.addheaders = opener.addheaders = [
-      ('User-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36')]
-  urllib.request.install_opener(opener)
 
   res = {'gif_count': None, 'video_count': None, 'image_count': None, 'plain': None, 'video_link': None}
+  att = ''
 
   if data['image']:
-    img_id = 1
+    att = att + '\n'
     for url in data['image']:
-      if (img_id <= 4):
-        try:
-          urllib.request.urlretrieve(url.replace('https://pbs.twimg.com/',config['TWITTER']['ImageProxy']), 'temp/img'+str(img_id)+'.png')
-          img_id = img_id+1
-        except Exception:
-          print(f'ERRO: failed[img]: {url}')
-          # for e in Exception:
-          #   print(e)
-
-    res['image_count']=img_id
+      att = att + 'IMAGE: [' + url + ']\n'
 
   if data['gif']:
     gif_id = 1
+    att = att + '\n'
     for url in data['gif']:
-      if (gif_id <= 4):
-        try:
-          urllib.request.urlretrieve(url.replace('https://video.twimg.com/',config['TWITTER']['VideoProxy']), 'temp/gif'+str(gif_id)+'.mp4')
-          ff = ffmpy.FFmpeg(
-              inputs={'temp/gif'+str(gif_id)+'.mp4': None},
-              outputs={'temp/gif'+str(gif_id)+'.gif': ['-vf', 'fps=10,scale=\'min(600,iw)\':-1:flags=lanczos', '-y']}
-          )
-          ff.run()
-          gif_id = gif_id+1
-        except Exception:
-          print(f'ERRO: failed[gif]: {url}')
-          try:
-            urllib.request.urlretrieve(data['gif_poster'][gif_id-1].replace('https://pbs.twimg.com/',config['TWITTER']['ImageProxy']), 'temp/gif'+str(gif_id)+'.gif')
-            gif_id = gif_id+1
-          except Exception:
-            print(f'ERRO: failed[gif]: {url}')
-          # for e in Exception:
-          #   print(e)
-
-    res['gif_count']=gif_id
+      att = att + 'IMAGE: ['+url +'] {'+data['gif_poster'][gif_id-1] +'}\n'
+      git_id = gif_id+1
 
   if data['video']:
-    video_id = 1
-    for url in data['video']:
-      if (video_id <= 1):
-        try:
-          if config['MASTODON']['IncludeVideo'] != 'false':
-            urllib.request.urlretrieve(url.replace('https://video.twimg.com/',config['TWITTER']['VideoProxy']), 'temp/video'+str(video_id)+'.mp4')
+    att = att + '\n'
+    att = att + 'VIDEO: ['+data['video'][0] +'] {'+data['video_poster'][0] +'}\n' 
+    res['video_link'] = data['video'][0]
 
-          urllib.request.urlretrieve(data['video_poster'][video_id-1].replace('https://pbs.twimg.com/',config['TWITTER']['ImageProxy']), 'temp/video'+str(video_id)+'.png')
-          res['video_link']=url
-          video_id = video_id+1
-        except Exception:
-          print(f'ERRO: failed[vid]: {url}')
-          # for e in Exception:
-          #   print(e)
-
-    res['video_count']=video_id
-  
-  res['plain']=data['plain']
+  res['plain'] = data['plain'] + att
 
   return res
 
