@@ -8,12 +8,35 @@ URL: https://2heng.xin
 License: MIT
 """
 from os import path, makedirs
+import re
 import shutil
 from .tweet_decoder import TweetDecoder
 from .media_downloader import MediaDownloader
 from .toot_poster import TootPoster
+from .get_config import GetConfig
+
+config = GetConfig()
+
+
+def TwitterFilter(feed_data):
+  if config['TWITTER'] is None:
+    return feed_data
+  try:
+    twitter_filter = config['TWITTER']['Filter']
+  except KeyError:
+    twitter_filter = None
+  if (twitter_filter is None) or (twitter_filter == 'False') or (twitter_filter == 'None'):
+    return feed_data
+  pat = re.compile(twitter_filter)
+  result = []
+  for feed in feed_data:
+    if pat.match(feed['summary']):
+        result.append(feed)
+  return result
+
 
 def Feed2Toot(feed_data):
+  feed_data = TwitterFilter(feed_data)
   if path.exists('db.txt'):
     historyList = [line.rstrip('\n') for line in open('db.txt')]
   else:

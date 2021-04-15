@@ -18,6 +18,15 @@ if __name__ == '__main__':
   if config['PROXY']['ProxyOn'] == 'true':
     os.environ['HTTP_PROXY'] = config['PROXY']['HttpProxy']
     os.environ['HTTPS_PROXY'] = config['PROXY']['HttpsProxy']
-
-  RSS_dict = FeedParaser(config['TWITTER']['TwitterRss'])
+  rss_url = config['TWITTER']['TwitterRss']
+  try:
+    RSS_dict = FeedParaser(rss_url)
+  except Exception:
+    backup_rss = config['TWITTER'].get('BackupRss', None)
+    print('WARN: source {} seems unavailable, switch to {}'.format(rss_url, backup_rss))
+    if backup_rss:
+      RSS_dict = FeedParaser(backup_rss)
+    else:
+      print('ERROR: no backup source found, exit')
+      exit(-1)
   Feed2Toot(RSS_dict)
